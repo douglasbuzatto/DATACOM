@@ -10,6 +10,7 @@ DM4610(config)# commit
 [admin@RB_BEBEDOURO.GPON] > /system ssh address=192.168.0.25 user=admin
 AVISO > /system ssh address=10.34.253.10 user=admin
 PONTAL DO IPIRANGA > /system ssh address=10.34.253.6 user=admin
+Povoação > /system ssh address=10.34.253.26 user=admin
 [supread@nas_reg.pop-linhares] > /system ssh address=10.0.32.2 user=admin
 Password:admin
 Welcome to the DmOS CLI
