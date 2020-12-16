@@ -1,0 +1,91 @@
+DM4610# config
+Entering configuration mode terminal
+DM4610(config)# interface gpon 1/1/1
+DM4610(config-gpon-1/1/1)# no onu 21
+DM4610(config-gpon-1/1/1)# top
+DM4610(config)# no service-port 221
+DM4610(config)# no service-port 222
+DM4610(config)# commit
+
+[admin@RB_BEBEDOURO.GPON] > /system ssh address=192.168.0.25 user=admin
+AVISO > /system ssh address=10.34.253.10 user=admin
+PONTAL DO IPIRANGA > /system ssh address=10.34.253.6 user=admin
+[supread@nas_reg.pop-linhares] > /system ssh address=10.0.32.2 user=admin
+Password:admin
+Welcome to the DmOS CLI
+admin connected from 10.0.32.1 using ssh on DM4610
+________________________________________________________________________________________________
+DM4610# show interface gpon onu
+________________________________________________________________________________________________
+DM4610# show interface gpon discovered-onus
+
+ Chassis / Slot / Port  Serial Number
+ ---------------------  -------------
+       1/1/2            DACM0001FDA9
+________________________________________________________________________________________________
+DM4610# show running-config service-port 
+service-port 111 gpon 1/1/1 onu 0 gem 1 match vlan vlan-id 463 action vlan replace vlan-id 463
+service-port 112 gpon 1/1/1 onu 0 gem 2 match vlan vlan-id 462 action vlan replace vlan-id 462
+service-port 211 gpon 1/1/2 onu 1 gem 1 match vlan vlan-id 463 action vlan replace vlan-id 463
+service-port 212 gpon 1/1/2 onu 1 gem 2 match vlan vlan-id 462 action vlan replace vlan-id 462
+\\Sempre olhar a sequencia da onu, usará sempre um número a mais. Exemplo: nessa caso ficará onu 2, pois a 0 e 1 já existe.
+________________________________________________________________________________________________
+DM4610# show running-config service-port ?        \\Apertando TAB, mostrará as possibilidades para completar.
+Possible completions:
+  |   Output modifiers
+  ---
+  111  112  211  212  <cr>
+Possible match completions:
+  action   Defines characteristics of network-side VLAN
+  gpon     Service-Port for interface GPON
+  match    Match user-side VLAN
+_________________________________________________________________________________________________
+DM4610# show running-config service-port gpon 1/1/2
+service-port 211 gpon 1/1/2 onu 1 gem 1 match vlan vlan-id 463 action vlan replace
+service-port 212 gpon 1/1/2 onu 1 gem 2 match vlan vlan-id 462 action vlan replace
+
+\\Mostrar os service-port rodando nas onus já existentes.
+_________________________________________________________________________________________________
+DM4610# config
+Entering configuration mode terminal
+DM4610(config)# interface gpon 1/1/2               \\Usar a interface que a onu foi descoberta
+DM4610(config-gpon-1/1/2)# onu 2                    \\Definir o ID da onu de acordo com a sequencia
+DM4610(config-gpon-onu-2)# name RGN14933211759               \\Definir no nome da onu na OLT de acordo com o pppoe do cliente
+DM4610(config-gpon-onu-2)# serial-number DACM0001FDA9          \\Deve ser o serial da onu descoberta
+DM4610(config-gpon-onu-2)# line-profile PPPoE_Router
+DM4610(config-gpon-onu-2)# line-profile PPPoE_Bridge  
+DM4610(config-gpon-onu-2)# veip 1
+DM4610(config-veip-1)# top
+DM4610(config)# service-port 213 gpon 1/1/2 onu 2 gem 1 match vlan vlan-id 463 action vlan replace vlan-id 463
+DM4610(config)# service-port 214 gpon 1/1/2 onu 2 gem 2 match vlan vlan-id 462 action vlan replace vlan-id 462
+DM4610(config)# commit    \\Para salvar
+Commit complete.
+DM4610(config)# end       \\Para sair do modo configuração
+
+\\Toda linha de comando que tive o # deve ser digitada uma a uma.
+\\Em todas a onus o gem vai ser = 1 e 2, cosiderar o 1 quando o Vlan-id for 463 e o 2 quando for 462
+\\No service-port ficará assim para os clientes 1/1/1 = 111 e segue a sequencia.
+\\No service-port ficará assim para os clientes 1/1/2 = 211 e segue a sequencia.
+\\No service-port ficará assim para os clientes 1/1/3 = 311 e segue a sequencia.
+\\No service-port ficará assim para os clientes 1/1/4 = 411 e segue a sequencia.
+\\No service-port ficará assim para os clientes 1/1/5 = 511 e segue a sequencia.
+\\Cada onu, ocupara dois service-port. Exemplo: se a onu tiver no 1/1/1, onu 1 usará 111 e 112, onu 2 usará 113 e 114 e assim por diante.
+\\Os service-port, jamais poderão se repetir.
+_________________________________________________________________________________________________                                                                                           
+DM4610# show interface gpon discovered-onus 
+% No entries found.
+\\Não apareceu outra vez, pois só descobre a onu uma única vez.
+_________________________________________________________________________________________________
+DM4610# show interface gpon onu
+  Itf     ONU ID   Serial Number   Oper State   Software Download State      Name
+--------  ------   -------------   ----------   --------------------------   ------------------------------------------------
+1/1/2     1        ITBS0D22D235    Up           None                         RGN09866287785BR                                
+1/1/2     2        DACM0001FDA9    Up           None                         RGN14933211759  
+
+\\Mostrará as onu em estado "up", mostra que a onu está aceita na OLT, logo a frente o nome que foi definido.
+_________________________________________________________________________________________________                                
+DM4610# show pppoe intermediate-agent sessions interface gpon 1/1/2
+
+Number of Active PPPoE Sessions   :  1
+\\Vai mostrar a quantidade de cliente que estão sendo intermediados pela OLT.
+_________________________________________________________________________________________________
